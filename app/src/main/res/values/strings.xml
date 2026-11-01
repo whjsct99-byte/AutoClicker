@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">自动点击器</string>
+    <string name="service_desc">识别并点击上传按钮，提供一键宏悬浮窗</string>
+</resources>

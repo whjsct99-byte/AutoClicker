@@ -11,7 +11,13 @@ jobs:
         with: { distribution: temurin, java-version: 17 }
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: 8.11.1 }
-      - run: gradle assembleDebug
+      - name: build
+        run: |
+          set +e
+          gradle assembleDebug --console=plain > build.log 2>&1
+          code=$?
+          grep -E "^e: " build.log | head -10 | while IFS= read -r line; do echo "::error::${line}"; done
+          exit $code
       - uses: actions/upload-artifact@v4
         with:
           name: AutoClicker-debug-apk

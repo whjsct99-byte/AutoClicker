@@ -16,6 +16,7 @@ import android.view.MotionEvent
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.TextView
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -202,11 +203,10 @@ class ClickerService : AccessibilityService() {
         }
     }
 
-    private suspend fun shot(): Bitmap? = suspendCancellableCoroutine<Bitmap?> { cont ->
-        val cb = object : AccessibilityService.TakeScreenshotCallback {
-            override fun onSuccess(result: AccessibilityService.ScreenshotResult) {
-                var out: Bitmap? = null
-                try {
-                    val hw = Bitmap.wrapHardwareBuffer(result.hardwareBuffer, result.colorSpace)
-                    if (hw != null) {
-       
+    private inner class ShotCb(val cont: CancellableContinuation<Bitmap?>) :
+        AccessibilityService.TakeScreenshotCallback {
+
+        override fun onSuccess(result: AccessibilityService.ScreenshotResult) {
+            val hw = Bitmap.wrapHardwareBuffer(result.hardwareBuffer, result.colorSpace)
+            val out: Bitmap? = hw?.copy(Bitmap.Config.ARGB_8888, false)
+            hw?.recycle()
